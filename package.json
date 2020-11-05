@@ -1,0 +1,19 @@
+{
+  "name": "nyt-monitor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^14.14.6",
+    "@types/urllib": "^2.33.0",
+    "dotenv": "^8.2.0",
+    "moment-timezone": "^0.5.31",
+    "tsc": "^1.20150623.0",
+    "urllib": "^2.36.1"
+  }
+}

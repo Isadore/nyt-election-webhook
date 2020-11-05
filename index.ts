@@ -189,7 +189,7 @@ async function pollEndpoint() {
 
             });
 
-            sendWebhook(req.data.races[0], lastPoll[0]);
+            // sendWebhook(req.data.races[0], lastPoll[0]);
 
         } else {
 

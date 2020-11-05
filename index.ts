@@ -174,8 +174,8 @@ async function pollEndpoint() {
             if(voteChange)
                 log(`Total Votes: ${totalVotes.toLocaleString()} - Change: ${(voteChange > 0 ? '+' : '') + voteChange.toLocaleString()}`);
 
-            // if(voteChange < 0) return;
-            
+            const StateFilter = String(process.env.STATE_FILTER) && String(process.env.STATE_FILTER).split(',').map(s => s.trim().toUpperCase())
+
             lastPoll.forEach((s, i) => {
 
                 let c = req.data.races.find(c => c.state_id == s.state_id);
@@ -184,7 +184,7 @@ async function pollEndpoint() {
                     lastPoll[i] = c;
                 else return;
     
-                if((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value))
+                if(((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value)) && (!StateFilter || StateFilter.includes(s.state_id.toUpperCase())))
                     return sendWebhook(c, s);
 
             });

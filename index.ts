@@ -181,7 +181,7 @@ async function pollEndpoint() {
                 let c = req.data.races.find(c => c.state_id == s.state_id);
 
                 if(s.votes < c.votes)
-                s = c;
+                    s = c;
     
                 if((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value)) {
                     return sendWebhook(c, s);

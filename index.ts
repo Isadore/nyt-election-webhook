@@ -191,7 +191,13 @@ async function pollEndpoint() {
 
             // sendWebhook(req.data.races[0], lastPoll[0]);
 
-        } else log(`New York Times Monitor Started - Total Votes: ${totalVotes.toLocaleString()}`);
+        } else {
+
+            log(`New York Times Monitor Started - Total Votes: ${totalVotes.toLocaleString()}`);
+
+            lastPoll = req.data.races;
+
+        };
 
     } else {
 
@@ -200,8 +206,6 @@ async function pollEndpoint() {
         return log('Error getting data: Malformed response');
 
     };
-
-    // lastPoll = req.data.races;
 
     checks++;
 };

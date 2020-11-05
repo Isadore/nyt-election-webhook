@@ -176,17 +176,17 @@ async function pollEndpoint() {
 
             // if(voteChange < 0) return;
             
-            lastPoll.forEach(s => {
+            lastPoll.forEach((s, i) => {
 
                 let c = req.data.races.find(c => c.state_id == s.state_id);
 
                 if(s.votes < c.votes)
-                    s = c;
+                    lastPoll[i] = c;
+                else return;
     
-                if((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value)) {
+                if((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value))
                     return sendWebhook(c, s);
-                };
-    
+
             });
 
             // sendWebhook(req.data.races[0], lastPoll[0]);

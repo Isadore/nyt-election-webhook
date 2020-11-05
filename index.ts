@@ -174,7 +174,7 @@ async function pollEndpoint() {
             if(voteChange)
                 log(`Total Votes: ${totalVotes.toLocaleString()} - Change: ${(voteChange > 0 ? '+' : '') + voteChange.toLocaleString()}`);
 
-            if(voteChange < 0) return;
+            // if(voteChange < 0) return;
             
             lastPoll.forEach(s => {
 
@@ -183,6 +183,9 @@ async function pollEndpoint() {
                 if((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value)) {
                     return sendWebhook(c, s);
                 };
+
+                if(s.votes < c.votes)
+                    s = c;
     
             });
 
@@ -198,7 +201,7 @@ async function pollEndpoint() {
 
     };
 
-    lastPoll = req.data.races;
+    // lastPoll = req.data.races;
 
     checks++;
 };

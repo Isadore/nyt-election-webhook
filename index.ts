@@ -214,7 +214,7 @@ async function sendWebhook(now: StateData, then: StateData, time = moment()) {
             dataType: "json",
             contentType: "json",
             data: {
-                username: 'Election Update',
+                username: 'Election Updates',
                 embeds: [{
                     title: `${now.state_name} (${now.state_id}) Election Update`,
                     color: (((now.leader_party_id == 'republican') && (now.leader_margin_value > then.leader_margin_value)) || ((now.leader_party_id == 'democrat') && (now.leader_margin_value < then.leader_margin_value))) ? 0xfc0303 : 0x0314fc,

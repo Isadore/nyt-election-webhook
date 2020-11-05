@@ -169,6 +169,13 @@ async function pollEndpoint() {
 
         if(checks > 0) {
 
+            let voteChange = totalVotes - lastPoll.reduce((a, b) => a + b.votes, 0);
+
+            if(voteChange)
+                log(`Total Votes: ${totalVotes.toLocaleString()} - Change: ${(voteChange > 0 ? '+' : '') + voteChange.toLocaleString()}`);
+
+            if(voteChange < 0) return;
+            
             lastPoll.forEach(s => {
 
                 let c = req.data.races.find(c => c.state_id == s.state_id);
@@ -180,11 +187,6 @@ async function pollEndpoint() {
             });
 
             // sendWebhook(req.data.races[0], lastPoll[0]);
-
-            let voteChange = totalVotes - lastPoll.reduce((a, b) => a + b.votes, 0);
-
-            if(voteChange)
-                log(`Total Votes: ${totalVotes.toLocaleString()} - Change: ${(voteChange > 0 ? '+' : '') + voteChange.toLocaleString()}`);
 
         } else log(`New York Times Monitor Started - Total Votes: ${totalVotes.toLocaleString()}`);
 

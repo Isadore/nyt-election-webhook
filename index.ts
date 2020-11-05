@@ -180,7 +180,7 @@ async function pollEndpoint() {
 
                 let c = req.data.races.find(c => c.state_id == s.state_id);
 
-                if(s.votes < c.votes)
+                if(Date.parse(s.last_updated) < Date.parse(c.last_updated))
                     lastPoll[i] = c;
                 else return;
     
@@ -189,7 +189,7 @@ async function pollEndpoint() {
 
             });
 
-            // sendWebhook(req.data.races[0], lastPoll[0]);
+            sendWebhook(req.data.races[0], lastPoll[0]);
 
         } else {
 
@@ -214,6 +214,12 @@ async function sendWebhook(now: StateData, then: StateData, time = moment()) {
 
     let req: urllib.HttpClientResponse<any>;
 
+    let partyVoteText = ['democrat', 'republican', 'other'].map(p => {
+        let t = then.geo.reduce((a, b) => b.vote_counted[p] + a, 0);
+        let n = now.geo.reduce((a, b) => b.vote_counted[p] + a, 0);
+        return `\n${p == 'democrat' ? 'Biden' : p == 'other' ? 'Other' : 'Trump'}: ${t.toLocaleString()} (${(t/then.votes * 100).toFixed()}%) => ${n.toLocaleString()} (${(n/now.votes * 100).toFixed()}%) ${(n >= t ? '+' : '') + (n - t).toLocaleString()}`
+    }).join('');
+
     try {
 
         req = await urllib.request(process.env.WEBHOOK_URL, {
@@ -227,7 +233,7 @@ async function sendWebhook(now: StateData, then: StateData, time = moment()) {
                     color: (((now.leader_party_id == 'republican') && (now.leader_margin_value > then.leader_margin_value)) || ((now.leader_party_id == 'democrat') && (now.leader_margin_value < then.leader_margin_value))) ? 0xfc0303 : 0x0314fc,
                     description: `**Leading Candidate:** ${now.leader_party_id == 'republican' ? 'Donald J. Trump' : 'Joseph R. Biden Jr.'}\n\n` + 
                     `**Margin:**\n+${then.leader_margin_value}% => +${now.leader_margin_value}% (${((now.leader_margin_value >= then.leader_margin_value) ? '+' : '') + parseFloat((now.leader_margin_value - then.leader_margin_value).toFixed(4))}%)\n+${parseInt(String(then.votes * then.leader_margin_value * .01)).toLocaleString()} votes => +${parseInt(String(now.votes * now.leader_margin_value * .01)).toLocaleString()} (${(parseInt(String(now.votes * now.leader_margin_value * .01)) >= parseInt(String(then.votes * then.leader_margin_value * .01)) ? '+' : '') + (parseInt(String(now.votes * now.leader_margin_value * .01)) - parseInt(String(then.votes * then.leader_margin_value * .01))).toLocaleString()})\n\n` +
-                    `**Reported Votes:**\n${then.votes.toLocaleString()} (${then.eevp_value}) => ${now.votes.toLocaleString()} (${now.eevp_value}) ${(now.votes >= then.votes) ? '+' : ''}${(now.votes - then.votes).toLocaleString()}\n\n` +
+                    `**Reported Votes:**\n${then.votes.toLocaleString()} (${then.eevp_value}) => ${now.votes.toLocaleString()} (${now.eevp_value}) ${(now.votes >= then.votes) ? '+' : ''}${(now.votes - then.votes).toLocaleString()}${partyVoteText}\n\n` +
                     `**Estimated Remaining Votes:** ${(now.tot_exp_vote - now.votes).toLocaleString()}`,
                     footer: {
                         text: time.tz('America/New_York').format('MM/DD/YYYY - hh:mm:ss A'),

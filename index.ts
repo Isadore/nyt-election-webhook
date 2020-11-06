@@ -106,7 +106,9 @@ async function sendWebhook(now: NYT_API.StateData, then: NYT_API.StateData, filt
         return `\n${{democrat: 'Biden', other: 'Other'}[p] || 'Trump'}: ${t.toLocaleString()} (${(t/then.votes * 100).toFixed()}%) => ${n.toLocaleString()} (${(n/now.votes * 100).toFixed()}%) ${(n >= t ? '+' : '') + (n - t).toLocaleString()}`
     }).join('');
 
-    let url = filtered ? (process.env.WEBHOOK_URL_FILTERED || process.env.WEBHOOK_URL) : process.env.WEBHOOK_URL;
+    let url = filtered ? process.env.WEBHOOK_URL_FILTERED : process.env.WEBHOOK_URL;
+
+    if(!url) return;
 
     try {
 

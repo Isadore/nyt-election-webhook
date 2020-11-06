@@ -180,12 +180,14 @@ async function pollEndpoint() {
 
                 let c = req.data.races.find(c => c.state_id == s.state_id);
 
-                if(Date.parse(s.last_updated) < Date.parse(c.last_updated))
+                if(Date.parse(s.last_updated) < Date.parse(c.last_updated)) {
+
+                    if(((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value)) && (!StateFilter || StateFilter.includes(s.state_id.toUpperCase())))
+                        sendWebhook(c, s);
+
                     lastPoll[i] = c;
-                else return;
-    
-                if(((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value)) && (!StateFilter || StateFilter.includes(s.state_id.toUpperCase())))
-                    return sendWebhook(c, s);
+
+                };
 
             });
 
@@ -231,7 +233,7 @@ async function sendWebhook(now: StateData, then: StateData, time = moment()) {
                 embeds: [{
                     title: `${now.state_name} (${now.state_id}) Election Update`,
                     color: (((now.leader_party_id == 'republican') && (now.leader_margin_value > then.leader_margin_value)) || ((now.leader_party_id == 'democrat') && (now.leader_margin_value < then.leader_margin_value))) ? 0xfc0303 : ((now.leader_margin_value == then.leader_margin_value) && (parseInt(String(then.votes * then.leader_margin_value * .01)) ==  parseInt(String(now.votes * now.leader_margin_value * .01)))) ? null : 0x0314fc,
-                    description: `**Leading Candidate:** ${now.leader_party_id == 'republican' ? 'Donald J. Trump' : 'Joseph R. Biden Jr.'}\n\n` + 
+                    description: `**Leading Candidate:** ${then.leader_party_id == 'republican' ? 'Donald J. Trump' : 'Joseph R. Biden Jr.'}${(now.leader_party_id != then.leader_party_id) ? ' => ' + (now.leader_party_id == 'republican' ? 'Donald J. Trump' : 'Joseph R. Biden Jr.') : ''}\n\n` + 
                     `**Margin:**\n+${then.leader_margin_value}% => +${now.leader_margin_value}% (${((now.leader_margin_value >= then.leader_margin_value) ? '+' : '') + parseFloat((now.leader_margin_value - then.leader_margin_value).toFixed(4))}%)\n+${parseInt(String(then.votes * then.leader_margin_value * .01)).toLocaleString()} votes => +${parseInt(String(now.votes * now.leader_margin_value * .01)).toLocaleString()} (${(parseInt(String(now.votes * now.leader_margin_value * .01)) >= parseInt(String(then.votes * then.leader_margin_value * .01)) ? '+' : '') + (parseInt(String(now.votes * now.leader_margin_value * .01)) - parseInt(String(then.votes * then.leader_margin_value * .01))).toLocaleString()})\n\n` +
                     `**Reported Votes:**\n${then.votes.toLocaleString()} (${then.eevp_value}) => ${now.votes.toLocaleString()} (${now.eevp_value}) ${(now.votes >= then.votes) ? '+' : ''}${(now.votes - then.votes).toLocaleString()}${partyVoteText}\n\n` +
                     `**Estimated Remaining Votes:** ${(now.tot_exp_vote - now.votes).toLocaleString()}`,

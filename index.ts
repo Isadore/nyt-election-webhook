@@ -60,7 +60,7 @@ async function pollEndpoint() {
 
                 if(Date.parse(s.last_updated) < Date.parse(c.last_updated)) {
 
-                    if(((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value))) {
+                    if(s.leader_margin_value != c.leader_margin_value) {
 
                         if(!StateFilter || StateFilter.includes(s.state_id.toUpperCase()))
                             sendWebhook(c, s, true);

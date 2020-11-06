@@ -4,11 +4,7 @@ import { NYT_API } from "./interfaces";
 
 require('dotenv').config();
 
-let lastPoll: NYT_API.StateData[];
-
-let lastEtag: string;
-
-let checks = 0;
+let lastPoll: NYT_API.StateData[], lastEtag: string, checks = 0;
 
 async function pollEndpoint() {
 
@@ -64,8 +60,14 @@ async function pollEndpoint() {
 
                 if(Date.parse(s.last_updated) < Date.parse(c.last_updated)) {
 
-                    if(((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value)) && (!StateFilter || StateFilter.includes(s.state_id.toUpperCase())))
+                    if(((s.votes != c.votes) || (s.leader_margin_value != c.leader_margin_value))) {
+
+                        if(!StateFilter || StateFilter.includes(s.state_id.toUpperCase()))
+                            sendWebhook(c, s, true);
+
                         sendWebhook(c, s);
+
+                    };
 
                     lastPoll[i] = c;
 
@@ -95,7 +97,7 @@ async function pollEndpoint() {
     checks++;
 };
 
-async function sendWebhook(now: NYT_API.StateData, then: NYT_API.StateData, time = moment()) {
+async function sendWebhook(now: NYT_API.StateData, then: NYT_API.StateData, filtered?: boolean, time = moment()) {
 
     let req: urllib.HttpClientResponse<any>;
 
@@ -104,9 +106,11 @@ async function sendWebhook(now: NYT_API.StateData, then: NYT_API.StateData, time
         return `\n${{democrat: 'Biden', other: 'Other'}[p] || 'Trump'}: ${t.toLocaleString()} (${(t/then.votes * 100).toFixed()}%) => ${n.toLocaleString()} (${(n/now.votes * 100).toFixed()}%) ${(n >= t ? '+' : '') + (n - t).toLocaleString()}`
     }).join('');
 
+    let url = filtered ? (process.env.WEBHOOK_URL_FILTERED || process.env.WEBHOOK_URL) : process.env.WEBHOOK_URL;
+
     try {
 
-        req = await urllib.request(process.env.WEBHOOK_URL, {
+        req = await urllib.request(url, {
             method: 'POST',
             dataType: "json",
             contentType: "json",
@@ -133,7 +137,7 @@ async function sendWebhook(now: NYT_API.StateData, then: NYT_API.StateData, time
     };
 
     if (req.status == 429)
-        return setTimeout(() => sendWebhook(now, then, time), Number(req.headers['retry-after']));
+        return setTimeout(() => sendWebhook(now, then, filtered, time), Number(req.headers['retry-after']));
     if (req.status != 204)
         return log(`Unexpected response sending webhook: ${req.status} ${JSON.stringify(req.data)}`);
 

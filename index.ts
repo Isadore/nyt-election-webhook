@@ -58,7 +58,7 @@ async function pollEndpoint() {
 
                 let c = req.data.races.find(c => c.state_id == s.state_id);
 
-                if(Date.parse(s.last_updated) < Date.parse(c.last_updated)) {
+                if((Date.parse(s.last_updated) < Date.parse(c.last_updated)) || (JSON.stringify(s) != JSON.stringify(c))) {
 
                     if(s.leader_margin_value != c.leader_margin_value) {
 

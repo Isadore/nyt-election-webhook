@@ -65,9 +65,9 @@ async function pollEndpoint() {
                         if(!StateFilter || StateFilter.includes(s.state_id.toUpperCase()))
                             sendWebhook(c, s, true);
 
-                        sendWebhook(c, s);
-
                     };
+
+                    sendWebhook(c, s);
 
                     lastPoll[i] = c;
 
